@@ -1,7 +1,9 @@
 name: Pull-Request-Checks
 on: [push]
 jobs:
-  test:
+  build:
+    env:
+      ENVIRONMENT: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
