@@ -1,7 +1,7 @@
 name: Pull-Request-Checks
 on: [push]
 jobs:
-  install-dependencies:
+  dependencies:
     env:
       ENVIRONMENT: test
     runs-on: ubuntu-latest
@@ -37,12 +37,13 @@ jobs:
       - run: poetry install --no-interaction
 
   tests:
-    needs: install-dependencies
+    needs:
+      install-dependencies
     steps:
       - run: poetry run pytest
 
   mypy:
-    needs: install-dependencies
+    needs: dependencies
     steps:
       - run: poetry run mypy
 
