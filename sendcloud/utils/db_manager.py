@@ -3,7 +3,7 @@ db manager module which includes all database related functions like creating se
 for tests goals
 """
 import enum
-from typing import Optional
+from typing import Optional, Generator
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
@@ -18,17 +18,23 @@ Base = declarative_base()
 
 
 class EDatabaseManipulationType(enum.Enum):
-    """EMessageType"""
+    """
+    EMessageType
+    """
 
     CREATE = "create_all"
     DROP = "drop_all"
 
 
-async def get_db_engine(database_url: Optional[str] = None) -> AsyncEngine:
-    """creates async engine for a given database url"""
+def get_db_engine(database_url: Optional[str] = None) -> AsyncEngine:
+    """
+    Creates async engine for a given database url
+    :param database_url: the database config url
+    :return: async database engine
+    """
     return create_async_engine(
         database_url or settings.database_url,
-        echo=True,
+        echo=False,
         future=True,
     )
 
@@ -41,19 +47,30 @@ async def get_session(engine: Optional[AsyncEngine] = None) -> "AsyncGenerator[a
     :returns AsyncSession
     """
     if engine is None:
-        engine = await get_db_engine(settings.database_url)
+        engine = get_db_engine(settings.database_url)
 
-    async_session = async_sessionmaker(engine, class_=AsyncSession)
+    async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with async_session() as session:
         yield session
 
 
+def get_session_injector() -> Generator[AsyncSession, None, None]:
+    """
+    Returns a session for fastapi to inject into routers
+    :return: async database session
+    """
+    engine = get_db_engine(settings.database_url)
+    async_session = async_sessionmaker(engine, class_=AsyncSession)
+    yield async_session()
+
+
 async def update_async_database_tables(mode: EDatabaseManipulationType) -> None:
     """
     Function used to create tables in async mode
-    :arg mode, whether to create or delete a table
+    :param mode: mode, whether to create or delete a table
+    :return:
     """
-    engine = await get_db_engine(settings.database_url)
+    engine = get_db_engine(settings.database_url)
     async with engine.begin() as conn:
         await conn.run_sync(getattr(Base.metadata, str(mode.value)))

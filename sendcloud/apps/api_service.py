@@ -1,10 +1,11 @@
-""" The app module """
+""" The main app module """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-
 from sendcloud.routers import all_routers
+from sendcloud.utils import settings
 
+print(settings.database_url)
 app = FastAPI()
 
 app.add_middleware(

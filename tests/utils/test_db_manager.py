@@ -17,8 +17,7 @@ DATABASE_URL = "sqlite+aiosqlite:///.sql_app.db"
 @pytest.mark.asyncio
 async def test_get_engine() -> None:
     """check if engine can be created for a given database"""
-    engine = await get_db_engine(DATABASE_URL)
-    await engine.connect()
+    engine = get_db_engine(DATABASE_URL)
     async with engine.connect() as connection:
         assert not connection.closed, "connection should be opened"
     assert connection.closed, "connection should be closed"
@@ -29,7 +28,7 @@ async def test_get_engine() -> None:
 async def test_get_session() -> None:
     """check if session is available for a given engine"""
     session: AsyncSession
-    engine = await get_db_engine(DATABASE_URL)
+    engine = get_db_engine(DATABASE_URL)
     async with get_session(engine) as session:
         res = (await session.execute(text("select 1"))).scalar()
         assert res == 1, "result should be 1"

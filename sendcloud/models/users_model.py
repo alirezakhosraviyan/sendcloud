@@ -3,9 +3,9 @@ from typing import List
 from sqlalchemy import Column, Integer, VARCHAR, ForeignKey
 from sqlalchemy.orm import validates, relationship, Mapped
 from sqlalchemy import Table
-
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sendcloud.utils import Base
-from sendcloud.models.feeds import Feed
+from sendcloud.models.feeds_model import Feed
 
 
 user_feed = Table(
@@ -17,8 +17,10 @@ user_feed = Table(
 
 
 # pylint: disable=too-few-public-methods
-class User(Base):
-    """User model clss to store data"""
+class User(AsyncAttrs, Base):
+    """
+    User model clss to store data
+    """
 
     __tablename__ = "users"
 
@@ -29,7 +31,12 @@ class User(Base):
 
     @validates("username")
     def validate_username(self, _, username) -> str:
-        """check if username has enough characters"""
-        if len(username) <= 5:
+        """
+        check if username has enough characters
+        :param _: ignoring the parameter
+        :param username: the username to check
+        :return: clean username or exception
+        """
+        if len(username) <= 2:
             raise ValueError("username too short")
         return username
