@@ -16,6 +16,7 @@ from sendcloud.utils import setup_tests
 @freeze_time("1995-02-25 8:20:20")
 async def test_create_feed_without_posting() -> None:
     """Check if Feed can be created with correct data"""
+    print(33333333)
     session: async_scoped_session
     async with get_session() as session:
         feed = Feed(
@@ -27,10 +28,10 @@ async def test_create_feed_without_posting() -> None:
             copyright_text="Copyright (c) 2010",
             created_at=datetime.now(),  # it should be added at database server side to avoid network delay impacts
         )
-
+        print(2)
         session.add(feed)
         await session.commit()
-
+        print(1)
         stmt = text("select * from feeds")
         retrieved_feed = (await session.execute(stmt)).one_or_none()
         assert retrieved_feed is not None, "feed should be added"

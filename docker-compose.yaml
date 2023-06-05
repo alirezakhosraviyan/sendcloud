@@ -19,6 +19,7 @@ services:
       - .:/sendcloud
     environment:
       - DATABASE_URL=postgresql+asyncpg://sendcloud:sendcloud@db:5435/sendcloud
+      - SCHEDULER_TIME_INTERVAL=300
     depends_on:
       - db
   db:

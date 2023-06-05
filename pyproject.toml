@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.scripts]
-startscheduler = "sendcloud.apps.pull_service:run"
+startscheduler = "sendcloud.apps.scheduler_service:run"
 
 [tool.poetry.dependencies]
 python = "^3.11"

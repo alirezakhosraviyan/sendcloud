@@ -61,6 +61,6 @@ async def fetch_feed(link: str) -> Tuple[Optional[FeedItemCreate], Optional[List
                     for entry in entries
                 ]
                 return feed_scheme, postings_scheme
-        except (ClientConnectorError, ClientTimeout) as error:
+        except ClientConnectorError as error:
             logger.error("[ERROR] Error creating feed %s", str(error))
             return None, None

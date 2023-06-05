@@ -21,8 +21,8 @@ class Feed(AsyncAttrs, Base):
     link = Column(VARCHAR(512), nullable=False, unique=True)
     title = Column(VARCHAR(255), nullable=False)
     lang = Column(VARCHAR(30), nullable=False)
-    copyright_text = Column(VARCHAR(1024), nullable=False)
-    description = Column(VARCHAR(1024), nullable=False)
+    copyright_text = Column(VARCHAR(5000), nullable=False)
+    description = Column(VARCHAR(5000), nullable=False)
     category = Column(VARCHAR(255), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())  # pylint: disable=not-callable
     active = Column(Boolean, default=True)
@@ -60,8 +60,8 @@ class Posting(Base):
     pk = Column(Integer, primary_key=True, index=True, autoincrement=True)
     link = Column(VARCHAR(512), nullable=False, unique=True)
     title = Column(VARCHAR(255), nullable=False)
-    description = Column(VARCHAR(1024), nullable=False)
-    author = Column(VARCHAR(1024), nullable=False)
+    description = Column(VARCHAR(5000), nullable=False)
+    author = Column(VARCHAR(3000), nullable=False)
     published_at = Column(DateTime, nullable=False)
     # pylint: disable=not-callable
     updated_at = Column(DateTime, server_onupdate=func.now(), server_default=func.now())  # type: ignore

@@ -28,6 +28,7 @@ async def insert_or_update_feed(
     feed_dict = feed.dict(exclude={"postings"})
     feed_stmt = insert(Feed).values(feed_dict).on_conflict_do_update(constraint="feeds_link_key", set_=feed_dict)
     res = await session.execute(feed_stmt)
+
     feed_pk: int = res.inserted_primary_key[0]  # type: ignore
     for cur in postings:
         postings_dict = cur.dict()
@@ -67,9 +68,10 @@ async def follow_new_feed(username: str, link: str, session: async_scoped_sessio
         .where(User.username == username)
         .options(selectinload(User.followed_feeds).options(selectinload(Feed.postings)))
     )
-    user = (await session.scalars(stmt)).one_or_none()
+    user = (await session.execute(stmt)).one_or_none()
     if user is None:
         return None
+    user_pk = user.pk
     # return the feed if it was already followed
     if retrieved_feed := _.find(user.followed_feeds, lambda item: item.link == link):
         return retrieved_feed
@@ -79,7 +81,7 @@ async def follow_new_feed(username: str, link: str, session: async_scoped_sessio
     if loaded_feed and loaded_postings:
         feed_pk = await insert_or_update_feed(loaded_feed, loaded_postings, session)
         if feed_pk is not None:
-            values = {"user_pk": user.pk, "feed_pk": feed_pk}
+            values = {"user_pk": user_pk, "feed_pk": feed_pk}
             stmt_rel = insert(user_feed).values(values).on_conflict_do_nothing(constraint="user_feed_pkey")
             await session.execute(stmt_rel)
             await session.commit()

@@ -1,64 +1,42 @@
 
-# Sendcould Assessment 
+## How to deploy on docker ?
 
-This project has been developed to assess the coding skills for Senior Software Engineer position at [sendcloud](https://www.sendcloud.nl/)
-
-
-
-## Documentation
-
-[Documentation](https://linktodocumentation)
-
-
-## Features
-
-- Light/dark mode toggle
-- Live previews
-- Fullscreen mode
-- Cross platform
-
-
-## Demo
-
-You already can work with the application here ->  [demo](http://0.0.0.0:8000)
-
-
-## How to deploy using docker-compsoe ?
-
-Open the project :
+- clone the project or open up the tar file which has been sent :
 
 ```bash
-# clone the project 
   git clone git@github.com:alirezakhosraviyan/sendcloud.git
-
-  cd sendcloud
-```
-OR
-```bash
-#untar the project file
   
+  #or
+
   tar –xvzf sendcloud.tar.gz
 
+  #then 
+  
   cd sendcloud
 ```
+- install docker and docker-compose :
+```bash
+   sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
-install requirements:
+   sudo chmod +x /usr/local/bin/docker-compose
+ 
+```
+
+- run the application using docker-compose (recommended):
 
 ```bash
 
-# install docker-compose 
+   docker-compose -f docker-compose.yaml up
 
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   # to clean the database in case of database failure
+   
+   docker-compose -f docker-compose.yaml down --volume
 
 ```
-
-deploy using docker-compose file:
+- to run tests: 
 
 ```bash
-docker-compose up
+
+   docker-compose -f docker-compose-tests.yaml up
+
 ```
-
-## Author
-
-- [@alireza Khosravian](https://www.linkedin.com/in/alirezakhosravian/)
-

@@ -75,7 +75,7 @@ async def unfollow_feed(
 @router_v1_0.get("/following/postings", status_code=200, response_model=FollowingFeedPostings)
 async def get_all_following_feed_postings(
         username: str,
-        feed_link: Optional[str],
+        feed_link: Optional[str]=None,
         is_read: Optional[bool] = Query(default=None),
         order_by: OrderByLastUpdate = OrderByLastUpdate.LAST_UPDATE_DESCENDING,
         offset: int = 0,
