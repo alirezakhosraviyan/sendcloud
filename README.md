@@ -1,10 +1,47 @@
 
+# Sendcould Assessment 
+
+This project has been developed to assess the coding skills for Senior Software Engineer position at [sendcloud](https://www.sendcloud.nl/)
+
+
+
+## Applications
+
+- #### API Service :
+&emsp; &emsp; &emsp;
+The fastapi application which server couple of controllers to manage our feedly!
+- #### Scheduler Service:
+&emsp; &emsp; &emsp; 
+
+
+## Features
+
+- database : postgresql
+- web-framework : fastapi
+- poetry
+- python3.11
+- sqlalchemy
+- asynchronous python  
+- docker and docker-compose
+- CI pipeline on github
+- more than 50 tests for services and scheduler 
+## Demo
+
+You can play around the application online or on your own machine
+
+- cloud  -->   [http://65.21.150.157:5000](http://65.21.150.157:5000/docs)
+- local machine -->  [http://0.0.0.0:5000](http://0.0.0.0:5000/docs)
+
+
+
+
+
 ## How to deploy on docker ?
 
 - clone the project or open up the tar file which has been sent :
 
 ```bash
-  git clone git@github.com:alirezakhosraviyan/sendcloud.git
+  git clone https://github.com/alirezakhosraviyan/sendcloud.git
   
   #or
 
@@ -40,3 +77,8 @@
    docker-compose -f docker-compose-tests.yaml up
 
 ```
+
+## Author
+
+- [@alireza Khosravian](https://www.linkedin.com/in/alirezakhosravian/)
+
