@@ -71,9 +71,9 @@ async def follow_new_feed(username: str, link: str, session: async_scoped_sessio
     user = (await session.execute(stmt)).one_or_none()
     if user is None:
         return None
-    user_pk = user.pk
+    user_pk = user[0].pk
     # return the feed if it was already followed
-    if retrieved_feed := _.find(user.followed_feeds, lambda item: item.link == link):
+    if retrieved_feed := _.find(user[0].followed_feeds, lambda item: item.link == link):
         return retrieved_feed
     # in case the feed is new then we try to fetch it (we haven't check if it already exists because for the
     # first time user would like to see the most updated posts)
@@ -189,7 +189,7 @@ async def make_posting_unread(username: str, posting_link: str, session: async_s
 
 def __get_feed_ids(feed_link: Optional[str], feed_collection: List[Feed]) -> List[int]:
     filtered_feeds = (
-        _.filter_(feed_collection, lambda index: index.link == feed_link) if feed_link is not None else feed_collection
+        _.filter_(feed_collection, lambda index: index.link == feed_link and index.active) if feed_link is not None else _.filter_(feed_collection, lambda index: index.active)
     )
     return _.map_(filtered_feeds, lambda index: int(index.pk))
 
@@ -224,9 +224,13 @@ async def filter_following_feed_postings(
     order_stm = (
         Posting.updated_at.desc() if order_by == OrderByLastUpdate.LAST_UPDATE_DESCENDING else Posting.updated_at.asc()
     )
+
     stmt = select(Posting).where(Posting.feed_id.in_(__get_feed_ids(feed_link, user_detailed.followed_feeds)))
+
     if is_read is not None:
-        stmt = stmt.join(read_postings, isouter=not is_read)
+        read_posting_ids_stmt = text("select posting_pk from read_postings where user_pk = :user_pk")
+        read_posting_ids = [cur[0] for cur in (await session.execute(read_posting_ids_stmt, {"user_pk": user_detailed.pk})).all()]
+        stmt = stmt.where(Posting.pk.in_(read_posting_ids) if is_read else Posting.pk.notin_(read_posting_ids))
 
     stmt = stmt.order_by(order_stm).offset(offset).limit(limit)
     postings = (await session.scalars(stmt)).all()
