@@ -6,6 +6,9 @@ authors = ["Alireza Khosravian <alireza.infotech@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
+[tool.poetry.scripts]
+startscheduler = "sendcloud.apps.scheduler_service:run"
+
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.95.2"
@@ -15,6 +18,9 @@ psycopg = {extras = ["binary"], version = "^3.1.9"}
 asyncpg = "^0.27.0"
 alembic = "^1.11.1"
 aiosqlite = "^0.19.0"
+feedparser = "^6.0.10"
+aiohttp = "^3.8.4"
+pydash = "^7.0.4"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.2.0"
@@ -28,39 +34,38 @@ uvicorn = "^0.22.0"
 aiosqlite = "^0.19.0"
 freezegun = "^1.2.2"
 sqlalchemy = {version = "2.0.15", extras = ["mypy"]}
+psycopg2 = "^2.9.6"
 
 [tool.mypy]
 files = ["tests", "sendcloud"]
 
 [[tool.mypy.overrides]]
 module = [
-    "sqlalchemy.*",
-    "prettytable.*",
-    "git.*",
-    "colorama.*"
+    "feedparser.*",
+    "sqlalchemy.*"
 ]
 ignore_missing_imports = true
 
 [tool.pylint.master]
 recursive = true
-ignore-paths = [ ".*venv.*", ".*.venv.*" ]
+ignore-paths = ["migrations", "venv", ".venv"]
 
 [tool.pylint.'MESSAGE']
 max-line-length = "120"
 
 [tool.pylint.'SIMILARITIES']
 ignore-imports = "yes"
-min-similarity-lines = 5
+min-similarity-lines = 50
 
 [tool.flakeheaven]
 exclude = ["venv", ".venv"]
 include = ["tests", "sendcloud"]
 
 [tool.flakeheaven.plugins]
-pycodestyle = ["+*", "-E501", "-E203", "-W503"]
+pycodestyle = ["-E501", "-E712"]
 
 [tool.pytest.ini_options]
-addopts = "--cov --cov-report=term-missing --disable-warnings --show-capture=no -v"
+addopts = "--cov=sendcloud --cov-report=term-missing --disable-warnings --show-capture=no -v -s"
 testpaths = [ "." ]
 ignore-glob = [ "flycheck_*" ]
 

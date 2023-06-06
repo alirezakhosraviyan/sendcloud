@@ -1,5 +1,5 @@
 # pull the official docker image
-FROM python:3.11.1-slim
+FROM python:3.11.1-alpine
 
 # set work directory
 WORKDIR /sendcloud
@@ -8,9 +8,12 @@ WORKDIR /sendcloud
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# install dependencies
 COPY requirements.txt .
-RUN pip install -r requirements.txt
 
-# copy project
+RUN \
+ apk add --no-cache postgresql-libs && \
+ apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
+ python3 -m pip install -r requirements.txt --no-cache-dir && \
+ apk --purge del .build-deps
+
 COPY . .

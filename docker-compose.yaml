@@ -3,13 +3,23 @@ version: '3.8'
 services:
   web:
     build: .
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn sendcloud.apps.main:app --host 0.0.0.0'
+    command: sh -c 'sleep 3; alembic upgrade head && uvicorn sendcloud.apps.api_service:app --host 0.0.0.0 --port 5000'
     volumes:
       - .:/sendcloud
     ports:
-      - "8000:8000"
+      - "5000:5000"
     environment:
-      - DATABASE_URL=postgresql://sendcloud_db_user:sendcloud_db_password@db:5432/sendcloud_db
+      - DATABASE_URL=postgresql+asyncpg://sendcloud:sendcloud@db:5435/sendcloud
+    depends_on:
+      - db
+  pull-service:
+    build: .
+    command: sh -c 'sleep 3; alembic upgrade head && export PYTHONPATH=${PYTHONPATH}:./sendcloud && python sendcloud/apps/scheduler_service.py'
+    volumes:
+      - .:/sendcloud
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://sendcloud:sendcloud@db:5435/sendcloud
+      - SCHEDULER_TIME_INTERVAL=300
     depends_on:
       - db
   db:
@@ -17,11 +27,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     expose:
-      - 5432
+      - 5435
     environment:
-      - POSTGRES_USER=sendcloud_db_user
-      - POSTGRES_PASSWORD=sendcloud_db_password
-      - POSTGRES_DB=sendcloud_db
+      - POSTGRES_USER=sendcloud
+      - POSTGRES_PASSWORD=sendcloud
+      - POSTGRES_DB=sendcloud
+    command: -p 5435
 
 volumes:
   postgres_data:

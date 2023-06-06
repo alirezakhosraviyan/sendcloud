@@ -1,4 +1,4 @@
-"""test Entry model"""
+"""test Posting model"""
 from datetime import datetime
 import pytest
 from sqlalchemy import text
@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import async_scoped_session
 from sqlalchemy.exc import IntegrityError
 from freezegun import freeze_time
 
-from sendcloud.models import Feed, Entry, User
+from sendcloud.models import Feed, Posting, User
 from sendcloud.utils import get_session
 from sendcloud.utils import setup_tests
 
@@ -14,7 +14,7 @@ from sendcloud.utils import setup_tests
 @pytest.mark.asyncio
 @setup_tests()
 @freeze_time("1995-02-25 8:20:20")
-async def test_create_feed_without_entry() -> None:
+async def test_create_feed_without_posting() -> None:
     """Check if Feed can be created with correct data"""
     session: async_scoped_session
     async with get_session() as session:
@@ -27,10 +27,8 @@ async def test_create_feed_without_entry() -> None:
             copyright_text="Copyright (c) 2010",
             created_at=datetime.now(),  # it should be added at database server side to avoid network delay impacts
         )
-
         session.add(feed)
         await session.commit()
-
         stmt = text("select * from feeds")
         retrieved_feed = (await session.execute(stmt)).one_or_none()
         assert retrieved_feed is not None, "feed should be added"
@@ -41,7 +39,7 @@ async def test_create_feed_without_entry() -> None:
         assert retrieved_feed[4] == "Copyright (c) 2010"
         assert retrieved_feed[5] == "Test Feed Description"
         assert retrieved_feed[6] == "Test Feed Category"
-        assert str(retrieved_feed[7]) == "1995-02-25 08:20:20.000000"
+        assert str(retrieved_feed[7]) == "1995-02-25 08:20:20"
 
 
 @pytest.mark.asyncio
@@ -96,8 +94,8 @@ async def test_create_feed_duplicate_link() -> None:
 
 @pytest.mark.asyncio
 @setup_tests()
-async def test_create_entry() -> None:
-    """Check if Entry can be created with correct data"""
+async def test_create_posting() -> None:
+    """Check if Posting can be created with correct data"""
     session: async_scoped_session
     async with get_session() as session:
         feed = Feed(
@@ -111,65 +109,71 @@ async def test_create_entry() -> None:
         session.add(feed)
         await session.commit()
 
-        entry = Entry(
-            title="Test Entry",
-            description="Test Entry Description",
-            link="http://testfeed.com/feeds/entry/1",
+        posting = Posting(
+            title="Test Posting",
+            description="Test Posting Description",
+            link="http://testfeed.com/feeds/posting/1",
+            author="test author",
+            published_at=datetime.now(),
             feed_id=1,
         )
-        session.add(entry)
+        session.add(posting)
 
         await session.commit()
 
-        stmt = text("select * from entries")
-        retrieved_entry = (await session.execute(stmt)).one_or_none()
-        assert retrieved_entry is not None, "feed should be added"
-        assert retrieved_entry[0] == 1
-        assert retrieved_entry[1] == "http://testfeed.com/feeds/entry/1"
-        assert retrieved_entry[2] == "Test Entry"
-        assert retrieved_entry[3] == "Test Entry Description"
+        stmt = text("select * from postings")
+        retrieved_posting = (await session.execute(stmt)).one_or_none()
+        assert retrieved_posting is not None, "feed should be added"
+        assert retrieved_posting[0] == 1
+        assert retrieved_posting[1] == "http://testfeed.com/feeds/posting/1"
+        assert retrieved_posting[2] == "Test Posting"
+        assert retrieved_posting[3] == "Test Posting Description"
 
 
 @pytest.mark.asyncio
 @setup_tests()
-async def test_create_entry_without_feed() -> None:
-    """Check if Entry can be created without Feed"""
+async def test_create_posting_without_feed() -> None:
+    """Check if posting can be created without Feed"""
     session: async_scoped_session
     async with get_session() as session:
-        entry = Entry(
-            title="Test Entry",
-            description="Test Entry Description",
-            link="http://testfeed.com/feeds/entry/1",
+        posting = Posting(
+            title="Test Posting",
+            description="Test Posting Description",
+            link="http://testfeed.com/feeds/posting/1",
+            author="test author",
+            published_at=datetime.now(),
             feed_id=None,
         )
-        session.add(entry)
+        session.add(posting)
         try:
             await session.commit()
         except IntegrityError:
             await session.rollback()
-            stmt = text("select count(1) from entries")
-            assert (await session.execute(stmt)).scalar() == 0, "No entries should be in the database"
+            stmt = text("select count(1) from postings")
+            assert (await session.execute(stmt)).scalar() == 0, "No postings should be in the database"
 
 
 @pytest.mark.asyncio
 @setup_tests()
-async def test_create_entry_with_wrong_foreignkey() -> None:
-    """Check if Entry can be created with wrong foreignkey"""
+async def test_create_posting_with_wrong_foreignkey() -> None:
+    """Check if posting can be created with wrong foreignkey"""
     session: async_scoped_session
     async with get_session() as session:
-        entry = Entry(
-            title="Test Entry",
-            description="Test Entry Description",
-            link="http://testfeed.com/feeds/entry/1",
+        posting = Posting(
+            title="Test posting",
+            description="Test posting Description",
+            link="http://testfeed.com/feeds/posting/1",
+            author="test author",
+            published_at=datetime.now(),
             feed_id=15,
         )
-        session.add(entry)
+        session.add(posting)
         try:
             await session.commit()
         except IntegrityError:
             await session.rollback()
-            stmt = text("select count(1) from entries")
-            assert (await session.execute(stmt)).scalar() == 0, "No entries should be in the database"
+            stmt = text("select count(1) from postings")
+            assert (await session.execute(stmt)).scalar() == 0, "No postings should be in the database"
 
 
 @pytest.mark.asyncio
@@ -209,8 +213,8 @@ async def test_create_feed_for_user() -> None:
 @pytest.mark.asyncio
 @setup_tests()
 @freeze_time("1995-02-25 8:20:20")
-async def test_read_entity_by_user() -> None:
-    """Check if an entity can be read by a user"""
+async def test_read_posting_by_user() -> None:
+    """Check if a posting can be read by a user"""
     session: async_scoped_session
     async with get_session() as session:
         feed = Feed(
@@ -231,29 +235,31 @@ async def test_read_entity_by_user() -> None:
         session.add(user)
         await session.commit()
 
-        entry = Entry(
-            title="Test Entry",
-            description="Test Entry Description",
-            link="http://testfeed.com/feeds/entry/1",
+        posting = Posting(
+            title="Test Posting",
+            description="Test Posting Description",
+            link="http://testfeed.com/feeds/posting/1",
+            author="test author",
+            published_at=datetime.now(),
             feed_id=1,
         )
-        entry.read_by.append(user)
-        session.add(entry)
+        posting.read_by.append(user)
+        session.add(posting)
 
         await session.commit()
 
-        stmt = text("select * from read_entries")
+        stmt = text("select * from read_postings")
         retrieved_user_feed = (await session.execute(stmt)).one_or_none()
 
-        assert retrieved_user_feed is not None, "The entry should had been saved as read"
+        assert retrieved_user_feed is not None, "The posting should had been saved as read"
         assert retrieved_user_feed.tuple() == (1, 1)
 
 
 @pytest.mark.asyncio
 @setup_tests()
 @freeze_time("1995-02-25 8:20:20")
-async def test_read_entity_twice() -> None:
-    """Check if an entity can be read twice by a user"""
+async def test_read_posting_twice() -> None:
+    """Check if a posting can be read twice by a user"""
     session: async_scoped_session
     async with get_session() as session:
         feed = Feed(
@@ -274,22 +280,23 @@ async def test_read_entity_twice() -> None:
         session.add(user)
         await session.commit()
 
-        entry = Entry(
-            title="Test Entry",
-            description="Test Entry Description",
-            link="http://testfeed.com/feeds/entry/1",
+        posting = Posting(
+            title="Test posting",
+            description="Test posting Description",
+            link="http://testfeed.com/feeds/posting/1",
+            author="test author",
+            published_at=datetime.now(),
             feed_id=1,
         )
-        entry.read_by.append(user)
-        session.add(entry)
+        posting.read_by.append(user)
+        session.add(posting)
         await session.commit()
 
         try:
-            insert_duplicate_stmt = text("insert into read_entries (user_pk, entry_pk) values (1,1)")
+            insert_duplicate_stmt = text("insert into read_postings (user_pk, posting_pk) values (1,1)")
             await session.execute(insert_duplicate_stmt)
-            await session.commit()
         except IntegrityError:
             await session.rollback()
-            stmt = text("select count(*) from read_entries")
+            stmt = text("select count(*) from read_postings")
             retrieved_user_feed = (await session.execute(stmt)).scalar()
             assert retrieved_user_feed == 1

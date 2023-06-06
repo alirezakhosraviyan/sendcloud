@@ -2,7 +2,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from sendcloud.apps.main import app
+from sendcloud.apps.api_service import app
 
 fastapi_client = TestClient(app)
 
