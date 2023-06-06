@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
-    command: sh -c 'do sleep 3; done; alembic upgrade head && uvicorn sendcloud.apps.api_service:app --host 0.0.0.0 --port 5000'
+    command: sh -c 'sleep 3; alembic upgrade head && uvicorn sendcloud.apps.api_service:app --host 0.0.0.0 --port 5000'
     volumes:
       - .:/sendcloud
     ports:
@@ -14,7 +14,7 @@ services:
       - db
   pull-service:
     build: .
-    command: sh -c 'do sleep 3; done; alembic upgrade head && export PYTHONPATH=${PYTHONPATH}:./sendcloud && python sendcloud/apps/scheduler_service.py'
+    command: sh -c 'sleep 3; alembic upgrade head && export PYTHONPATH=${PYTHONPATH}:./sendcloud && python sendcloud/apps/scheduler_service.py'
     volumes:
       - .:/sendcloud
     environment:
