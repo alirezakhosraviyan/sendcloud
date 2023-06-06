@@ -3,7 +3,7 @@ on: [push]
 jobs:
   build:
     env:
-      DATABASE_URL: DATABASE_URL=postgresql+asyncpg://sendcloud:sendcloud@0.0.0.0:5432/sendcloud
+      DATABASE_URL: DATABASE_URL=postgresql+asyncpg://sendcloud:sendcloud@localhost:5432/sendcloud
     runs-on: ubuntu-latest
     services:
       postgres:
