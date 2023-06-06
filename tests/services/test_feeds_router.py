@@ -1,8 +1,8 @@
 """test feed services"""
 import datetime
 from typing import List
-import pytest
 from unittest.mock import patch, MagicMock
+import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_scoped_session
 
@@ -58,6 +58,7 @@ async def test_get_feed_by_pk() -> None:
         session.add(feed)
         await session.commit()
         retrieved_feed = await feed_services.get_feed_by_pk(1, session)
+        assert retrieved_feed is not None
         assert retrieved_feed[0].pk == 1
         assert retrieved_feed[0].title == "Test title"
         assert retrieved_feed[0].link == "test_link"
@@ -142,8 +143,10 @@ async def test_insert_or_update_with_duplicate_data() -> None:
 
 
 @pytest.mark.asyncio
-@patch("sendcloud.services.feeds_services.fetch_feed",
-       return_value=__create_feed_and_posting_schemas("test_feed_link1", ["posting_link1"]))
+@patch(
+    "sendcloud.services.feeds_services.fetch_feed",
+    return_value=__create_feed_and_posting_schemas("test_feed_link1", ["posting_link1"]),
+)
 @setup_tests()
 async def test_follow_new_feed_which_doesnt_exist(feed_fetch_mock: MagicMock) -> None:
     """check if we can follow new feed which doesn't exist with correct data"""
@@ -389,8 +392,8 @@ async def test_make_posting_which_exists_unread() -> None:
         session.add(user)
         await session.commit()
 
-        read_posting = text("insert into read_postings values (1,1)")
-        await session.execute(read_posting)
+        read_posting_stmt = text("insert into read_postings values (1,1)")
+        await session.execute(read_posting_stmt)
 
         res = await feed_services.make_posting_unread("test_username", "posting_link1", session)
         assert res
@@ -406,7 +409,6 @@ async def test_make_posting_which_doesnt_exist_unread() -> None:
     """check if we can make a posting which doesn't exist unread"""
     session: async_scoped_session
     async with get_session() as session:
-
         user = User(username="test_username")
         session.add(user)
         await session.commit()
@@ -454,7 +456,7 @@ async def test_get_feed_to_be_updated():
             lang="Dutch",
             link="test_link3",
             copyright_text="Copyright (c) 2010",
-            active=False
+            active=False,
         )
         session.add_all([feed1_active, feed2_active, feed3_inactive])
         await session.commit()
@@ -477,7 +479,7 @@ async def test_deactivate_background_refresh():
             lang="Dutch",
             link="test_link1",
             copyright_text="Copyright (c) 2010",
-            active=True
+            active=True,
         )
         session.add(feed_active)
         await session.commit()
@@ -512,8 +514,10 @@ async def test_force_update_when_user_doesnt_exist() -> None:
 
 
 @pytest.mark.asyncio
-@patch("sendcloud.services.feeds_services.fetch_feed",
-       return_value=__create_feed_and_posting_schemas("test_link1", ["posting_link1"]))
+@patch(
+    "sendcloud.services.feeds_services.fetch_feed",
+    return_value=__create_feed_and_posting_schemas("test_link1", ["posting_link1"]),
+)
 @setup_tests()
 async def test_force_update(feed_fetch_mock: MagicMock) -> None:
     """check if we can force update an inactive feed"""
@@ -526,7 +530,7 @@ async def test_force_update(feed_fetch_mock: MagicMock) -> None:
             lang="Dutch",
             link="test_link1",
             copyright_text="Copyright (c) 2010",
-            active=False
+            active=False,
         )
         session.add(feed_inactive)
         await session.commit()
@@ -546,6 +550,7 @@ async def test_force_update(feed_fetch_mock: MagicMock) -> None:
         assert len(feeds) == 1
         assert feeds[0].link == "test_link1"
         assert feeds[0].active
+
 
 #
 # @pytest.mark.asyncio

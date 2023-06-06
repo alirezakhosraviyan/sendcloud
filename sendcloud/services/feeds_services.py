@@ -189,7 +189,9 @@ async def make_posting_unread(username: str, posting_link: str, session: async_s
 
 def __get_feed_ids(feed_link: Optional[str], feed_collection: List[Feed]) -> List[int]:
     filtered_feeds = (
-        _.filter_(feed_collection, lambda index: index.link == feed_link and index.active) if feed_link is not None else _.filter_(feed_collection, lambda index: index.active)
+        _.filter_(feed_collection, lambda index: index.link == feed_link and index.active)
+        if feed_link is not None
+        else _.filter_(feed_collection, lambda index: index.active)
     )
     return _.map_(filtered_feeds, lambda index: int(index.pk))
 
@@ -229,7 +231,9 @@ async def filter_following_feed_postings(
 
     if is_read is not None:
         read_posting_ids_stmt = text("select posting_pk from read_postings where user_pk = :user_pk")
-        read_posting_ids = [cur[0] for cur in (await session.execute(read_posting_ids_stmt, {"user_pk": user_detailed.pk})).all()]
+        read_posting_ids = [
+            cur[0] for cur in (await session.execute(read_posting_ids_stmt, {"user_pk": user_detailed.pk})).all()
+        ]
         stmt = stmt.where(Posting.pk.in_(read_posting_ids) if is_read else Posting.pk.notin_(read_posting_ids))
 
     stmt = stmt.order_by(order_stm).offset(offset).limit(limit)
@@ -243,32 +247,44 @@ async def get_feeds_to_be_scheduled(session: async_scoped_session) -> List[Feed]
     :param session: the database session
     :return: List of feed's link
     """
-    feeds_stmt = select(Feed.pk, Feed.link, Feed.active).where(Feed.active == True)
-    return (await session.execute(feeds_stmt)).all()  # type: ignore
+    stmt = select(Feed.pk, Feed.link, Feed.active).where(Feed.active == True)  # pylint: disable=singleton-comparison
+    return (await session.execute(stmt)).all()  # type: ignore
 
 
 async def deactivate_background_refresh(feed_pk: int, session: async_scoped_session) -> None:
+    """
+    This function deactivates the background refresh for a feed unless someone updates it by force
+    :param feed_pk: the feed
+    :param session: database session
+    :return: None
+    """
     update_stmt = (
-        update(Feed)
-        .where(Feed.pk == feed_pk)
-        .values({"active": False})
-        .execution_options(synchronize_session="fetch")
+        update(Feed).where(Feed.pk == feed_pk).values({"active": False}).execution_options(synchronize_session="fetch")
     )
     await session.execute(update_stmt)
     await session.commit()
 
 
 async def force_update_feed(username: str, feed_link: str, session: async_scoped_session) -> bool:
+    """
+    Tries to update an inactive feed and in cae of successful then it activates the feed and we again will have
+    background refresh for that feed
+    :param username: the user unique identifier
+    :param feed_link: the feed unique identifier
+    :param session: database session
+    :return:
+    """
     # checking if the user exists
     user = await get_user_by_username(username, session)
     if user is None:
         return False
+    user_pk = user.pk
 
     loaded_feed, loaded_postings = await fetch_feed(feed_link)
     if loaded_feed and loaded_postings:
         feed_pk = await insert_or_update_feed(loaded_feed, loaded_postings, session)
         if feed_pk is not None:
-            values = {"user_pk": user.pk, "feed_pk": feed_pk}
+            values = {"user_pk": user_pk, "feed_pk": feed_pk}
             stmt_rel = insert(user_feed).values(values).on_conflict_do_nothing(constraint="user_feed_pkey")
             await session.execute(stmt_rel)
             await session.commit()

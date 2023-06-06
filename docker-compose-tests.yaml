@@ -3,11 +3,11 @@ version: '3.8'
 services:
   tests:
     build: .
-    command: sh -c 'alembic upgrade head && export PYTHONPATH=${PYTHONPATH}:./sendcloud && pytest .'
+    command: sh -c 'sleep 3; alembic upgrade head && export PYTHONPATH=${PYTHONPATH}:./sendcloud && pytest .'
     volumes:
       - .:/sendcloud
     environment:
-      - DATABASE_URL=postgresql+asyncpg://sendcloud:sendcloud@db:5435/sendcloud
+      - DATABASE_URL=postgresql+asyncpg://sendcloud:sendcloud@db:5436/sendcloud
     depends_on:
       - db
   db:
@@ -15,12 +15,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     expose:
-      - 5435
+      - 5436
     environment:
       - POSTGRES_USER=sendcloud
       - POSTGRES_PASSWORD=sendcloud
       - POSTGRES_DB=sendcloud
-    command: -p 5435
+    command: -p 5436
 
 volumes:
   postgres_data:

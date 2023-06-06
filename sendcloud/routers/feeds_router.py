@@ -17,7 +17,7 @@ router_v1_0 = APIRouter(prefix="/v1.0/feeds")
 
 @router_v1_0.patch("/postings/read", status_code=200)
 async def mark_posting_read(
-        body: FollowingFeedInput, session: async_scoped_session = Depends(get_session_injector)
+    body: FollowingFeedInput, session: async_scoped_session = Depends(get_session_injector)
 ) -> None:
     """
     Mark a feed as read for a specific user
@@ -31,7 +31,7 @@ async def mark_posting_read(
 
 @router_v1_0.patch("/postings/unread", status_code=200)
 async def mark_posting_unread(
-        body: FollowingFeedInput, session: async_scoped_session = Depends(get_session_injector)
+    body: FollowingFeedInput, session: async_scoped_session = Depends(get_session_injector)
 ) -> None:
     """
     Mark a post as unread for a specific user
@@ -45,7 +45,7 @@ async def mark_posting_unread(
 
 @router_v1_0.post("/follow", status_code=200, response_model=FollowingFeedsCreateResult)
 async def follow_new_feed(
-        new_feed: FollowingFeedInput, session: async_scoped_session = Depends(get_session_injector)
+    new_feed: FollowingFeedInput, session: async_scoped_session = Depends(get_session_injector)
 ) -> Optional[Dict[str, Optional[Feed]]]:
     """
     Follow a new feed for a user with the given feed link
@@ -60,7 +60,7 @@ async def follow_new_feed(
 
 @router_v1_0.delete("/unfollow", status_code=200)
 async def unfollow_feed(
-        feed_to_be_deleted: FollowingFeedInput, session: async_scoped_session = Depends(get_session_injector)
+    feed_to_be_deleted: FollowingFeedInput, session: async_scoped_session = Depends(get_session_injector)
 ) -> None:
     """
     Unfollow a feed for a user with the given feed link
@@ -74,13 +74,13 @@ async def unfollow_feed(
 
 @router_v1_0.get("/following/postings", status_code=200, response_model=FollowingFeedPostings)
 async def get_all_following_feed_postings(
-        username: str,
-        feed_link: Optional[str]=None,
-        is_read: Optional[bool] = Query(default=None),
-        order_by: OrderByLastUpdate = OrderByLastUpdate.LAST_UPDATE_DESCENDING,
-        offset: int = 0,
-        limit: int = 10,
-        session: async_scoped_session = Depends(get_session_injector),
+    username: str,
+    feed_link: Optional[str] = None,
+    is_read: Optional[bool] = Query(default=None),
+    order_by: OrderByLastUpdate = OrderByLastUpdate.LAST_UPDATE_DESCENDING,
+    offset: int = 0,
+    limit: int = 10,
+    session: async_scoped_session = Depends(get_session_injector),
 ) -> Dict[str, Sequence[Row]]:
     # pylint: disable=too-many-arguments
     """
@@ -101,9 +101,9 @@ async def get_all_following_feed_postings(
 
 
 @router_v1_0.post("/feed/force-update", status_code=200)
-async def force_update_feed(feed_to_be_updated: FollowingFeedInput,
-                            session: async_scoped_session = Depends(get_session_injector)
-                            ) -> None:
+async def force_update_feed(
+    feed_to_be_updated: FollowingFeedInput, session: async_scoped_session = Depends(get_session_injector)
+) -> None:
     """
     Each feed gets deactivated after three times failure in refreshing but user can force update a feed, and it will be
     activated again if it was successful

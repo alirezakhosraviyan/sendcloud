@@ -55,25 +55,18 @@ max-line-length = "120"
 
 [tool.pylint.'SIMILARITIES']
 ignore-imports = "yes"
-min-similarity-lines = 5
+min-similarity-lines = 50
 
 [tool.flakeheaven]
-exclude = ["venv", ".venv"]
 include = ["tests", "sendcloud"]
 
 [tool.flakeheaven.plugins]
-pycodestyle = ["+*", "-E501", "-E203", "-W503"]
+pycodestyle = ["-E501", "-E712"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=sendcloud --cov-report=term-missing --disable-warnings --show-capture=no -v -s"
 testpaths = [ "." ]
 ignore-glob = [ "flycheck_*" ]
-
-[tool.coverage.run]
-omit = [
-     "*/venv/*",
-     "*/nix/*"
-]
 
 [tool.coverage.report]
 show_missing = true

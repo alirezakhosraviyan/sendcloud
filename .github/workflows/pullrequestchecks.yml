@@ -3,8 +3,22 @@ on: [push]
 jobs:
   build:
     env:
-      ENVIRONMENT: test
+      DATABASE_URL: DATABASE_URL=postgresql+asyncpg://sendcloud:sendcloud@0.0.0.0:5432/sendcloud
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: sendcloud
+          POSTGRES_PASSWORD: sendcloud
+          POSTGRES_DB: sendcloud
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v2
 

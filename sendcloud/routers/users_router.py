@@ -8,7 +8,7 @@ from sqlalchemy import Row
 from sqlalchemy.ext.asyncio import async_scoped_session
 
 from sendcloud.schemas import UserItem, UserInput
-from sendcloud.services import users_services as users_services
+from sendcloud.services import users_services
 from sendcloud.utils import get_session_injector
 
 # routers

@@ -1,7 +1,8 @@
 """Scheduler test Module"""
-import pytest
-import datetime
+from typing import Tuple
 from unittest.mock import MagicMock, patch, AsyncMock
+import datetime
+import pytest
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_scoped_session
@@ -16,7 +17,7 @@ from sendcloud.schemas import FeedItemCreate, PostingItemCreate
 async def mock_coroutine(error: bool = False) -> None:
     """Mocking async func"""
     if error:
-        raise Exception("Finish the infinity loop!")
+        raise Exception("Finish the infinity loop!")  # pylint: disable=broad-exception-raised
 
 
 @pytest.mark.asyncio
@@ -50,7 +51,7 @@ async def test_run_scheduler(task_start_mock: MagicMock, sleep_mock: MagicMock) 
             lang="Dutch",
             link="test_link3",
             copyright_text="Copyright (c) 2010",
-            active=False
+            active=False,
         )
         session.add_all([feed1_active, feed2_active, feed3_inactive])
         await session.commit()
@@ -142,7 +143,8 @@ async def test_task_on_success() -> None:
                 author="posting_author",
                 published_at=datetime.datetime.now(),
                 description="posting_description",
-            )]
+            )
+        ]
 
         task = Task(feed1_active)
         on_task_success = getattr(task, "_Task__on_task_success")
@@ -172,7 +174,7 @@ async def test_task_on_success_after_retry() -> None:
             lang="Dutch",
             link="test_link1",
             copyright_text="Copyright (c) 2010",
-            active=False  # False indicates the task for this feed had some retries
+            active=False,  # False indicates the task for this feed had some retries
         )
         session.add(feed1_inactive)
         await session.commit()
@@ -198,14 +200,17 @@ async def test_task_on_success_after_retry() -> None:
         assert retrieved_feed[2] == "should be changed to me!"
 
 
-fetch_feed_result = (FeedItemCreate(
-    link="test_link1",
-    title="should be changed to me!",
-    lang="feed_lank",
-    copyright_text="feed_copyright_test",
-    description="test_description",
-    category="cat1",
-), [])
+fetch_feed_result: Tuple[FeedItemCreate, list] = (
+    FeedItemCreate(
+        link="test_link1",
+        title="should be changed to me!",
+        lang="feed_lank",
+        copyright_text="feed_copyright_test",
+        description="test_description",
+        category="cat1",
+    ),
+    [],
+)
 
 
 @pytest.mark.asyncio
@@ -221,7 +226,7 @@ async def test_task_start(sleep_mock: MagicMock, fetch_feed_mock: MagicMock) -> 
         lang="Dutch",
         link="test_link1",
         copyright_text="Copyright (c) 2010",
-        active=True
+        active=True,
     )
 
     task = Task(feed1_active)
@@ -252,7 +257,7 @@ async def test_task_start_can_retry_on_failure_no_success(sleep_mock: MagicMock,
         lang="Dutch",
         link="test_link1",
         copyright_text="Copyright (c) 2010",
-        active=True
+        active=True,
     )
 
     task = Task(feed1_active)

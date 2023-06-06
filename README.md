@@ -11,7 +11,8 @@ This project has been developed to assess the coding skills for Senior Software 
 &emsp; &emsp; &emsp;
 The fastapi application which server couple of controllers to manage our feedly!
 - #### Scheduler Service:
-&emsp; &emsp; &emsp; 
+ &emsp; 
+The background async proccess which is being ran on a seprate docker container. Because the nature of the application is async and the code is **IO-bound** then it makes more sense to use async over multithreading or multi processing unless parsing xml files doesn't become a problem.
 
 
 ## Features
@@ -51,11 +52,11 @@ You can play around the application online or on your own machine
   
   cd sendcloud
 ```
-- install docker and docker-compose :
+- install docker and docker-compose ( ignore if you already have the docker-compose ):
 ```bash
-   sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
-   sudo chmod +x /usr/local/bin/docker-compose
+   chmod +x /usr/local/bin/docker-compose
  
 ```
 
@@ -70,7 +71,11 @@ You can play around the application online or on your own machine
    docker-compose -f docker-compose.yaml down --volume
 
 ```
-- to run tests: 
+- open on your local machine on port **5000**
+
+   [http://0.0.0.0:5000/docs](http://0.0.0.0:5000/docs)
+
+- to run tests (optional): 
 
 ```bash
 
@@ -78,7 +83,6 @@ You can play around the application online or on your own machine
 
 ```
 
-## Author
-
-- [@alireza Khosravian](https://www.linkedin.com/in/alirezakhosravian/)
+## 🚀 About Me
+I'm a Senior Software Engineer, you can fine more about me [here](https://www.linkedin.com/in/alirezakhosravian/)
 

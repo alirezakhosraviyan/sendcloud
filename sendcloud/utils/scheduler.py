@@ -24,6 +24,7 @@ from sendcloud.models import Feed
 _LOGGER = logging.getLogger(__name__)
 
 
+#  pylint: disable=too-few-public-methods
 class Task:
     """
     A task is created to update a feed
@@ -41,7 +42,11 @@ class Task:
         session: async_scoped_session
         async with get_session() as session:
             await feed_services.insert_or_update_feed(loaded_feed[0], loaded_feed[1], session)
-            _LOGGER.debug("[DEBUG] Feed with link : %s successfully updated with %s postings", self.__feed.link, len(loaded_feed[1]))
+            _LOGGER.debug(
+                "[DEBUG] Feed with link : %s successfully updated with %s postings",
+                self.__feed.link,
+                len(loaded_feed[1]),
+            )
 
     async def __on_task_failure(self) -> None:
         """
@@ -50,7 +55,7 @@ class Task:
         """
         session: async_scoped_session
         async with get_session() as session:
-            await feed_services.deactivate_background_refresh(self.__feed.pk, session)
+            await feed_services.deactivate_background_refresh(int(self.__feed.pk), session)
 
     async def start(self) -> None:
         """
@@ -58,11 +63,11 @@ class Task:
         :return: None
         """
         for retry in range(2, 9, 3):
-            loaded_feed = await fetch_feed(self.__feed.link)
+            loaded_feed = await fetch_feed(str(self.__feed.link))
             if loaded_feed != (None, None):
-                await self.__on_task_success(loaded_feed)
+                await self.__on_task_success(loaded_feed)  # type: ignore
                 break
-            elif retry == 2:
+            if retry == 2:
                 # in case the feed is not available we immediately make it deactivate to prevent from being scheduled
                 # while it still needs to be retried
                 await self.__on_task_failure()
@@ -70,6 +75,7 @@ class Task:
             await sleep(retry * 60)
 
 
+#  pylint: disable=too-few-public-methods
 class Scheduler:
     """
     Crates task for each feed once every X-time
@@ -88,15 +94,20 @@ class Scheduler:
     async def __load_feeds_to_be_scheduled() -> List[Feed]:
         """
         Loads all active feeds
-        :return:
+        :return: list of feeds
         """
-        sessions: async_scoped_session
+        session: async_scoped_session
         async with get_session() as session:
             feeds = await feed_services.get_feeds_to_be_scheduled(session)
             _LOGGER.debug("[DEBUG] %s feeds are ready to be scheduled", len(feeds))
             return feeds
 
-    async def run(self):
+    async def run(self) -> None:
+        """
+        Entry point of the main scheduler which reads database every X-time and if there is any active feed then
+        schedules them for update via creating a task
+        :return: None
+        """
         _LOGGER.info("[INFO] Scheduler is running ... ")
         while True:
             feeds_to_be_scheduled = await self.__load_feeds_to_be_scheduled()

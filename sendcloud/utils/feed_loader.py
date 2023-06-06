@@ -6,7 +6,6 @@ from datetime import datetime
 import logging
 from typing import Optional, Tuple, List
 import aiohttp
-from aiohttp import ClientConnectorError, ClientTimeout
 import feedparser
 
 from sendcloud.schemas import FeedItemCreate, PostingItemCreate
@@ -61,6 +60,8 @@ async def fetch_feed(link: str) -> Tuple[Optional[FeedItemCreate], Optional[List
                     for entry in entries
                 ]
                 return feed_scheme, postings_scheme
-        except Exception as error:
+        except (
+            Exception  # pylint: disable=broad-exception-caught
+        ) as error:
             logger.error("[ERROR] Exception in Feed loader , kind: %s, message : %s", type(error), str(error))
             return None, None

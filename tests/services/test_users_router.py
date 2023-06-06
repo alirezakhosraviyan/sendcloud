@@ -56,6 +56,7 @@ async def test_get_user() -> None:
         await __add_user_wit_feed("test_user2", "http://testfeed.com/feeds/2", session)
 
         user = await user_services.get_user_by_username("test_user1", session)
+        assert user is not None
         assert user.username == "test_user1"
 
 
@@ -77,7 +78,6 @@ async def test_create_user() -> None:
     """Check if a user can be created with correct data"""
     session: async_scoped_session
     async with get_session() as session:
-
         await user_services.create_user("test_user1", session)
 
         user_stmt = text("select * from users")
@@ -93,7 +93,6 @@ async def test_create_duplicate_user() -> None:
     """Check if a user can be created with correct data"""
     session: async_scoped_session
     async with get_session() as session:
-
         try:
             await user_services.create_user("test_user1", session)
             await user_services.create_user("test_user1", session)

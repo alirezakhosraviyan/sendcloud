@@ -1,6 +1,7 @@
 """test users routers"""
-import pytest
+from typing import List
 from unittest.mock import patch, MagicMock
+import pytest
 from fastapi.testclient import TestClient
 
 from sendcloud.apps.api_service import app
@@ -10,12 +11,9 @@ from sendcloud.utils import setup_tests
 fastapi_client = TestClient(app)
 
 
-def __get_users_with_feeds():
+def __get_users_with_feeds() -> List[User]:
     """creates sample user data"""
-    users = [
-        User(username='testuser1'),
-        User(username='testuser2')
-    ]
+    users = [User(username="testuser1"), User(username="testuser2")]
 
     feed_inactive = Feed(
         title="Test title",
@@ -24,7 +22,7 @@ def __get_users_with_feeds():
         lang="Dutch",
         link="test_link1",
         copyright_text="Copyright (c) 2010",
-        active=False
+        active=False,
     )
 
     feed2_active = Feed(
@@ -34,7 +32,7 @@ def __get_users_with_feeds():
         lang="Dutch",
         link="test_link2",
         copyright_text="Copyright (c) 2010",
-        active=True
+        active=True,
     )
 
     feed3_active = Feed(
@@ -44,7 +42,7 @@ def __get_users_with_feeds():
         lang="Dutch",
         link="test_link3",
         copyright_text="Copyright (c) 2010",
-        active=False
+        active=False,
     )
 
     users[0].followed_feeds.append(feed_inactive)
@@ -74,9 +72,7 @@ async def test_get_all_users(get_users_mocker: MagicMock):
 @setup_tests()
 async def test_create_user(get_users_mocker: MagicMock):
     """test can create a user"""
-    result = fastapi_client.post("/v1.0/users/", json={
-        "username": "testuser1"
-    })
+    result = fastapi_client.post("/v1.0/users/", json={"username": "testuser1"})
 
     assert result.status_code == 201
     get_users_mocker.assert_called()
