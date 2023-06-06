@@ -48,7 +48,7 @@ ignore_missing_imports = true
 
 [tool.pylint.master]
 recursive = true
-ignore-paths = ["migrations"]
+ignore-paths = ["migrations", "venv", ".venv"]
 
 [tool.pylint.'MESSAGE']
 max-line-length = "120"
@@ -58,6 +58,7 @@ ignore-imports = "yes"
 min-similarity-lines = 50
 
 [tool.flakeheaven]
+exclude = ["venv", ".venv"]
 include = ["tests", "sendcloud"]
 
 [tool.flakeheaven.plugins]
@@ -67,6 +68,12 @@ pycodestyle = ["-E501", "-E712"]
 addopts = "--cov=sendcloud --cov-report=term-missing --disable-warnings --show-capture=no -v -s"
 testpaths = [ "." ]
 ignore-glob = [ "flycheck_*" ]
+
+[tool.coverage.run]
+omit = [
+     "*/venv/*",
+     "*/nix/*"
+]
 
 [tool.coverage.report]
 show_missing = true
